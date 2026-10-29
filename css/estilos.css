@@ -1,0 +1,383 @@
+/* =========================================================
+   Pip en la Granja Mágica — estilos de la interfaz
+   (el mundo 3D se dibuja en el <canvas>; aquí solo van
+   botones, títulos y globos que flotan encima)
+   ========================================================= */
+
+:root {
+  --crema: #fff8ea;
+  --tinta: #3b2a1f;
+  --naranja: #ff8a3d;
+  --naranja-oscuro: #e0641c;
+  --cian: #4fe3f0;
+  --rosa: #ff7eb6;
+  --amarillo: #ffd84d;
+  --verde: #5fd068;
+  --sombra: 0 10px 0 rgba(120, 60, 20, .25), 0 18px 40px rgba(60, 30, 10, .3);
+  --fuente: "Baloo 2", "Comic Sans MS", "Chalkboard SE", "Trebuchet MS", sans-serif;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #ffb37a;
+  font-family: var(--fuente);
+  color: var(--tinta);
+  /* Evita que el toque haga zoom o seleccione texto en tablets */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#lienzo3d {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: pointer;
+}
+
+button { font-family: inherit; cursor: pointer; }
+
+/* ---------- Pantallas que cubren todo ---------- */
+.pantalla {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.pantalla-inicio {
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255, 255, 255, .55), transparent 55%),
+    linear-gradient(180deg, #8fc8ff 0%, #ffd2a1 70%, #ffb37a 100%);
+}
+.cargando { margin: 0; font-size: 18px; opacity: .75; }
+
+/* ---------- Botones gigantes para manitos pequeñas ---------- */
+.boton-gigante {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: min(80vw, 340px);
+  max-width: 92vw;
+  min-height: 110px;
+  padding: 18px clamp(16px, 5vw, 36px);
+  border: 6px solid #fff;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(180deg, #ffa860, var(--naranja) 55%, var(--naranja-oscuro));
+  box-shadow: var(--sombra);
+  font-size: clamp(28px, 6vw, 44px);
+  font-weight: 900;
+  letter-spacing: .02em;
+  text-shadow: 0 3px 0 rgba(150, 60, 0, .35);
+  transition: transform .15s ease;
+}
+.boton-gigante:active { transform: scale(.94) translateY(4px); }
+.boton-gigante:focus-visible { outline: 6px solid var(--cian); outline-offset: 6px; }
+.emoji-grande { font-size: 1.4em; line-height: 1; animation: toque 1.2s ease-in-out infinite; }
+
+.boton-empezar { animation: latido 1.6s ease-in-out infinite; }
+.boton-jugar {
+  margin-top: auto;              /* abajo, para que Pip se vea en el centro */
+  min-height: 120px;
+  font-size: clamp(40px, 9vw, 64px);
+  animation: latido 1.2s ease-in-out infinite;
+}
+
+.boton-saltar {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 20;
+  padding: 12px 22px;
+  border: 3px solid rgba(255, 255, 255, .8);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(40, 30, 60, .45);
+  backdrop-filter: blur(6px);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+/* ---------- Título con letras que rebotan ---------- */
+.pantalla-titulo {
+  justify-content: flex-start;
+  gap: 14px;
+  padding: max(28px, 6vh) 16px max(22px, 4vh);
+  pointer-events: none;            /* deja ver y tocar el 3D detrás */
+  background: linear-gradient(180deg, rgba(255, 240, 220, .35), transparent 35%, transparent 70%, rgba(255, 200, 150, .45));
+}
+.pantalla-titulo > * { pointer-events: auto; }
+.titulo {
+  margin: 0;
+  font-size: clamp(38px, 8.5vw, 92px);
+  line-height: 1.05;
+  font-weight: 900;
+}
+.titulo .linea { display: block; white-space: nowrap; }
+.titulo .letra {
+  display: inline-block;
+  color: var(--color, #fff);
+  -webkit-text-stroke: .06em #fff;
+  paint-order: stroke fill;
+  text-shadow: 0 .07em 0 rgba(110, 50, 20, .35), 0 .15em .3em rgba(80, 30, 10, .25);
+  animation:
+    letra-entra .7s cubic-bezier(.34, 1.56, .64, 1) both,
+    letra-rebota 2.4s ease-in-out infinite;
+  animation-delay: var(--retraso), calc(var(--retraso) + .8s);
+}
+.titulo .espacio { display: inline-block; width: .35em; }
+.credito {
+  margin: 0;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(255, 248, 234, .85);
+  font-size: clamp(14px, 3.2vw, 19px);
+}
+
+/* ---------- Barra superior ---------- */
+.barra-superior {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 15;
+  display: flex;
+  gap: 10px;
+  pointer-events: none;
+}
+.barra-superior > * { pointer-events: auto; }
+.espaciador { flex: 1; pointer-events: none; }
+.boton-redondo {
+  display: grid;
+  width: 66px;
+  height: 66px;
+  place-items: center;
+  padding: 0;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  background: rgba(255, 248, 234, .92);
+  box-shadow: 0 6px 0 rgba(120, 60, 20, .2), 0 10px 20px rgba(60, 30, 10, .2);
+  font-size: 32px;
+  transition: transform .15s ease;
+}
+.boton-redondo:active { transform: scale(.9); }
+.boton-redondo[aria-pressed="false"] { opacity: .55; filter: grayscale(1); }
+
+/* ---------- Globo de texto de Pip ---------- */
+.globo {
+  position: fixed;
+  left: 50%;
+  bottom: max(18px, 3vh);
+  z-index: 12;
+  width: min(92vw, 640px);
+  padding: 18px 24px 16px;
+  border: 5px solid #fff;
+  border-radius: 32px;
+  background: var(--crema);
+  box-shadow: var(--sombra);
+  transform: translateX(-50%);
+  animation: globo-aparece .45s cubic-bezier(.34, 1.56, .64, 1) both;
+  pointer-events: none;
+}
+.globo-nombre {
+  position: absolute;
+  top: -18px;
+  left: 26px;
+  padding: 2px 16px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--naranja);
+  font-size: 18px;
+  font-weight: 900;
+}
+.globo p {
+  margin: 0;
+  font-size: clamp(17px, min(4.4vw, 5.2vh), 30px);
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.aviso {
+  position: fixed;
+  top: 92px;
+  left: 50%;
+  z-index: 16;
+  padding: 10px 20px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(40, 30, 60, .7);
+  font-size: 18px;
+  font-weight: 800;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  animation: globo-aparece .3s ease both;
+}
+
+/* ---------- Progreso de la zona (estrellitas arriba al centro) ---------- */
+.progreso {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  z-index: 14;
+  display: flex;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 4px solid #fff;
+  border-radius: 999px;
+  background: rgba(255, 248, 234, .92);
+  box-shadow: 0 6px 0 rgba(120, 60, 20, .2);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.progreso .paso {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  color: #c9b79c;
+  font-size: 26px;
+  font-weight: 900;
+}
+.progreso .paso.hecho { font-size: 30px; }
+.progreso .paso.nuevo { animation: estrella-nueva .7s cubic-bezier(.34, 1.56, .64, 1); }
+
+/* ---------- Botón 🔊 repetir ---------- */
+.boton-repetir {
+  position: fixed;
+  right: 14px;
+  top: 50%;
+  z-index: 15;
+  display: grid;
+  width: 92px;
+  height: 92px;
+  place-items: center;
+  padding: 0;
+  border: 5px solid #fff;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #7fe3ff, #36a9e0);
+  box-shadow: var(--sombra);
+  font-size: 44px;
+  transform: translateY(-50%);
+  animation: latido-repetir 2s ease-in-out infinite;
+}
+.boton-repetir:active { transform: translateY(-50%) scale(.9); }
+
+/* ---------- Créditos ---------- */
+.pantalla-creditos {
+  z-index: 18;
+  justify-content: flex-end;
+  padding-bottom: max(24px, 5vh);
+  background: linear-gradient(180deg, rgba(20, 20, 50, 0) 30%, rgba(30, 20, 60, .55));
+  pointer-events: none;
+}
+.pantalla-creditos > * { pointer-events: auto; }
+.creditos-caja {
+  width: min(92vw, 560px);
+  padding: 22px 22px 18px;
+  border: 5px solid #fff;
+  border-radius: 34px;
+  background: rgba(255, 248, 234, .95);
+  box-shadow: var(--sombra);
+  animation: globo-subir .8s cubic-bezier(.34, 1.56, .64, 1) both;
+}
+.creditos-caja h2 {
+  margin: 0 0 6px;
+  color: var(--naranja-oscuro);
+  font-size: clamp(30px, 7vw, 48px);
+  line-height: 1.05;
+}
+.creditos-lista {
+  height: 104px;
+  margin: 8px 0 16px;
+  overflow: hidden;
+  mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent);
+  -webkit-mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent);
+}
+.creditos-lista ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  animation: creditos-suben 16s linear infinite;
+}
+.creditos-lista li { padding: 4px 0; font-size: clamp(16px, 3.8vw, 21px); }
+.creditos-lista li strong { color: var(--naranja-oscuro); }
+.boton-otra-vez { min-height: 96px; font-size: clamp(30px, 7vw, 46px); animation: latido 1.2s ease-in-out infinite; }
+
+/* ---------- Animaciones ---------- */
+@keyframes estrella-nueva {
+  0% { transform: scale(0) rotate(-90deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+@keyframes latido-repetir {
+  0%, 100% { box-shadow: var(--sombra), 0 0 0 0 rgba(79, 200, 240, .6); }
+  50% { box-shadow: var(--sombra), 0 0 0 16px rgba(79, 200, 240, 0); }
+}
+@keyframes globo-subir {
+  from { opacity: 0; transform: translateY(80px) scale(.8); }
+}
+@keyframes creditos-suben {
+  from { transform: translateY(104px); }
+  to { transform: translateY(-100%); }
+}
+@keyframes latido {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+}
+@keyframes toque {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes letra-entra {
+  0% { opacity: 0; transform: translateY(-120px) scale(.3, 1.6); }
+  60% { opacity: 1; transform: translateY(10px) scale(1.25, .75); }
+  80% { transform: translateY(-6px) scale(.95, 1.08); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes letra-rebota {
+  0%, 70%, 100% { transform: translateY(0) scale(1); }
+  78% { transform: translateY(0) scale(1.12, .86); }
+  86% { transform: translateY(-.22em) scale(.94, 1.08); }
+  94% { transform: translateY(0) scale(1.04, .96); }
+}
+@keyframes globo-aparece {
+  from { opacity: 0; transform: translateX(-50%) translateY(30px) scale(.8); }
+}
+
+@media (max-height: 520px) {
+  .boton-redondo { width: 54px; height: 54px; font-size: 26px; }
+  .boton-repetir { width: 72px; height: 72px; font-size: 34px; top: 40%; }
+  .progreso .paso { width: 30px; height: 30px; font-size: 21px; }
+  .progreso .paso.hecho { font-size: 24px; }
+  .creditos-caja { padding: 12px 18px 12px; }
+  .creditos-caja h2 { font-size: 28px; }
+  .creditos-lista { height: 56px; margin: 4px 0 10px; }
+  .boton-otra-vez { min-height: 64px; font-size: 28px; }
+  .boton-jugar { min-height: 84px; }
+  .globo { padding: 12px 18px 10px; }
+}
+
+/* En celulares las estrellitas bajan para no chocar con los botones de arriba */
+@media (max-width: 640px) {
+  .progreso { top: 88px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
